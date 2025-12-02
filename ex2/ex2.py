@@ -43,16 +43,24 @@ def read_and_tokenize_development_set(filename):
 
     try:
         with open(filename, 'r', encoding='utf-8') as f:
-            for i, line in enumerate(f):
+            header = True
+            for line_number, line in enumerate(f):
+                # Tokenization: split by white spaces
+                line_tokens = line.strip().split()
+                if not line_tokens:
+                    continue  # Skip empty lines
                 # The input file contains 2 lines per article - header and article text.
-                if i % 2 != 0:
-                    # Tokenization: split by white spaces (everything between 2 white spaces is an event)
-                    token_list.append(line.strip().split())
+                if header:
+                    header = False
+                    continue
+                header = True #alternate between header and text
+                token_list.extend(line_tokens)
+                #token_list = token_list + line_tokens
     except FileNotFoundError:
         print(f"Error: Development set file not found at {filename}")
         sys.exit(1)
 
-    return token_list, len(token_list)
+    return token_list
 
 
 def init(f, dev_file, test_file, input_word, output_file):
@@ -76,12 +84,43 @@ def init(f, dev_file, test_file, input_word, output_file):
     f.write(f"#Output6\t{p_uniform}\n")
 
 
-def development_set_preprocessing(f, num_of_events):
+def development_set_preprocessing(f, token_list):
     """
     Writes preprocessing outputs for the development set (Output7).
     """
     # (a) Output7: total number of events in the development set
+    num_of_events = len(token_list)
     f.write(f"#Output7\t{num_of_events}\n")
+
+
+def lidstone_model_training(f, token_list):
+    """
+    Implements Lidstone model training section:
+    Splits the development set into training and validation sets (90%/10%)
+
+    Args:
+        f (file object): The open file handle to write to.
+        token_list (list): The sequence of all events S from the development set.
+
+    Returns:
+        tuple: (training_set, validation_set)
+    """
+    num_events = len(token_list)  # Total number of events |S|
+
+    # Calculate the size of the training set (90% of |S|)
+    training_size = int(round(0.9 * num_events))
+    # Split the set
+    training_set = token_list[:training_size]
+    validation_set = token_list[training_size:]
+    validation_size = len(validation_set)
+
+    # (a) Output8: number of events in the validation set
+    f.write(f"#Output8\t{validation_size}\n")
+    # (b) Output9: number of events in the training set
+    f.write(f"#Output9\t{training_size}\n")
+
+    return training_set, validation_set
+
 
 
 def main():
@@ -93,7 +132,7 @@ def main():
 
     # Development set preprocessing
     # token_list represents sequence of events
-    token_list, num_of_events = read_and_tokenize_development_set(dev_set_filename)
+    token_list = read_and_tokenize_development_set(dev_set_filename)
 
     try:
         with open(output_filename, 'w') as f:
@@ -101,7 +140,11 @@ def main():
             init(f, dev_set_filename, test_set_filename, input_word, output_filename)
 
             # Section 2: Development set preprocessing
-            development_set_preprocessing(f, num_of_events)
+            development_set_preprocessing(f, token_list)
+
+            # Section 3: Lidstone model training (Output8, Output9)
+            training_set, validation_set = lidstone_model_training(f, token_list)
+
     except IOError as e:
         print(f"Error writing to file {output_filename}: {e}")
 
