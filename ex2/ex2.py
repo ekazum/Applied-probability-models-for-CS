@@ -93,7 +93,7 @@ def development_set_preprocessing(f, token_list):
     f.write(f"#Output7\t{num_of_events}\n")
 
 
-def lidstone_model_training(f, token_list):
+def lidstone_model_training(f, token_list, input_word):
     """
     Implements Lidstone model training section:
     Splits the development set into training and validation sets (90%/10%)
@@ -104,6 +104,9 @@ def lidstone_model_training(f, token_list):
 
     Returns:
         tuple: (training_set, validation_set)
+        :param token_list: list of events in file
+        :param f: output file handle
+        :param input_word: the INPUT_WORD from command line
     """
     num_events = len(token_list)  # Total number of events |S|
 
@@ -119,8 +122,15 @@ def lidstone_model_training(f, token_list):
     # (b) Output9: number of events in the training set
     f.write(f"#Output9\t{training_size}\n")
 
-    return training_set, validation_set
+    # (c) Output10: number of different events in the training set (observed vocabulary)
+    observed_vocabulary = len(set(training_set))
+    f.write(f"#Output10\t{observed_vocabulary}\n")
 
+    # (d) Output11: number of times INPUT_WORD appears in the training set
+    input_word_count = training_set.count(input_word)
+    f.write(f"#Output11\t{input_word_count}\n")
+
+    return training_set, validation_set
 
 
 def main():
@@ -143,7 +153,7 @@ def main():
             development_set_preprocessing(f, token_list)
 
             # Section 3: Lidstone model training (Output8, Output9)
-            training_set, validation_set = lidstone_model_training(f, token_list)
+            training_set, validation_set = lidstone_model_training(f, token_list, input_word)
 
     except IOError as e:
         print(f"Error writing to file {output_filename}: {e}")
