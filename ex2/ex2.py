@@ -1,4 +1,5 @@
 import sys
+import math
 
 # Constants defined in the exercise description
 VOCABULARY_SIZE = 300000  # The assumed language vocabulary size V
@@ -26,7 +27,7 @@ def parse_arguments():
     return dev_set_filename, test_set_filename, input_word, output_filename
 
 
-def read_and_tokenize_development_set(filename):
+def read_and_tokenize_data(filename):
     """
     Reads the development set file, processes the text,
     and returns the sequence of events (tokens) and the total count.
@@ -57,7 +58,7 @@ def read_and_tokenize_development_set(filename):
                 token_list.extend(line_tokens)
                 #token_list = token_list + line_tokens
     except FileNotFoundError:
-        print(f"Error: Development set file not found at {filename}")
+        print(f"Error: Set file not found at {filename}")
         sys.exit(1)
 
     return token_list
@@ -92,6 +93,31 @@ def development_set_preprocessing(f, token_list):
     num_of_events = len(token_list)
     f.write(f"#Output7\t{num_of_events}\n")
 
+def model_evaluation_on_test_set(f, test_token_list):
+    """
+    Writes model evaluation outputs for the test set (Output26-29).
+    """
+    # (a) Output26: total number of events in the test set
+    num_of_events = len(test_token_list)
+    f.write(f"#Output25\t{num_of_events}\n")
+
+
+
+def model_perplexity(token_list, training_counts, lambda_val, n_training):
+    """
+    Compute perplexity of token_list under Lidstone model with given lambda.
+    """
+    n = len(token_list)
+    if n == 0:
+        return float('inf')
+    log_prob_sum = 0.0
+    denom = n_training + lambda_val * VOCABULARY_SIZE
+    for w in token_list:
+        cw = training_counts.get(w, 0)
+        prob = (cw + lambda_val) / denom
+        # safety: prob should be > 0 due to smoothing
+        log_prob_sum += math.log(prob)
+    return math.exp(- (log_prob_sum / n))
 
 def lidstone_model_training(f, token_list, input_word):
     """
@@ -142,7 +168,7 @@ def main():
 
     # Development set preprocessing
     # token_list represents sequence of events
-    token_list = read_and_tokenize_development_set(dev_set_filename)
+    dev_token_list = read_and_tokenize_data(dev_set_filename)
 
     try:
         with open(output_filename, 'w') as f:
@@ -150,10 +176,15 @@ def main():
             init(f, dev_set_filename, test_set_filename, input_word, output_filename)
 
             # Section 2: Development set preprocessing
-            development_set_preprocessing(f, token_list)
+            development_set_preprocessing(f, dev_token_list)
 
             # Section 3: Lidstone model training (Output8, Output9)
-            training_set, validation_set = lidstone_model_training(f, token_list, input_word)
+            training_set, validation_set = lidstone_model_training(f, dev_token_list, input_word)
+
+            # Section 6: Test set preprocessing (Output25)
+            test_token_list = read_and_tokenize_data(test_set_filename)
+            model_evaluation_on_test_set(f, test_token_list)
+
 
     except IOError as e:
         print(f"Error writing to file {output_filename}: {e}")
