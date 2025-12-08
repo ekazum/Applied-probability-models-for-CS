@@ -1,0 +1,12 @@
+#Students	Eli Kazum	038298857	Karen Fuchs	302345624
+#Output1	develop.txt
+#Output2	test.txt
+#Output3	a
+#Output4	output.txt
+#Output5	300000
+#Output6	3.3333333333333333e-06
+#Output7	415148
+#Output8	41515
+#Output9	373633
+#Output10	18976
+#Output11	7061
