@@ -171,9 +171,7 @@ def debug_lindstone_model(f, training_set, validation_set, lambda_val):
 
     total_prob = prob_seen + prob_unseen_total
     diff = abs(1.0 - total_prob)
-
-    # Write a debug line to help verify normalization
-    f.write(f"#DebugLidstone(lambda={lambda_val})\t{total_prob}\t{diff}\n")
+    
     return diff == 0
 
 
@@ -182,13 +180,13 @@ def choose_best_lambda(training_set, validation_set):
     Chooses the best lambda value for the Lidstone model.
     Tests lambda values from 0 to 2 with step 0.01.
     """
-    best_lambda = 0.0
+    best_lambda = 0.01
     best_perplexity = float('inf')
     
     # Grid search: loop over lambda values from 0 to 2 with step 0.01
     # This gives us 201 values: 0, 0.01, 0.02, ..., 1.99, 2.0
-    for i in range(0, 201):  # 0 to 200 inclusive = 201 values
-        lambda_val = i * 0.01
+    for i in range(0, 200):  # 0 to 200 inclusive = 201 values
+        lambda_val = round(i * 0.01, 2) + 0.01
         perplexity = evaluate_lindstone_model_preplexity(training_set, validation_set, lambda_val)
         if perplexity < best_perplexity:
             best_perplexity = perplexity
@@ -299,15 +297,11 @@ def compute_held_out_model(training_set, held_out_set):
     for r, words_with_r in freq_to_words.items():
         t_r = 0
         n_r = 0
-        
         if r == 0:
-            # For unseen words (r=0): count words in held-out that don't appear in training
-            # t_0 = sum of c_H(y) for all words y where c_T(y) = 0
-            # n_0 = number of distinct words that appeared 0 times in training
-            for word in words_with_r:
-                if word in held_out_counts:
-                    t_r += held_out_counts[word]
-                    n_r += 1
+            # Count all occurrences of unseen words in held-out set
+            t_r = sum(held_out_counts[word] for word in words_with_r if word in held_out_counts)
+            # n_0 should be the total number of unseen word types
+            n_r = VOCABULARY_SIZE - len(training_counts)
         else:
             # For seen words (r > 0): count words that appeared r times in training
             # t_r = sum of c_H(y) for all words y where c_T(y) = r
@@ -442,6 +436,7 @@ def main(dev_set_filename, test_set_filename, input_word, output_filename):
             debug_held_out_model(f, held_out_model, training_set_heldout, held_out_set)
             
             # Section 6: evaluation on test set
+            test_set = read_and_tokenize_development_set(test_set_filename)
             evaluation_on_test_set(f, training_set_lindstone, held_out_model, test_set, input_word, best_lambda)
 
     except IOError as e:
