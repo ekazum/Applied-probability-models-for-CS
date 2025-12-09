@@ -531,18 +531,12 @@ def evaluation_on_test_set(f, training_set_lindstone, held_out_model, test_set, 
         f.write("#Output28\tH\n")
 
 
-def main(dev_set_filename, test_set_filename, input_word, output_filename):
+def main():
     """
     Main function that orchestrates the entire Exercise 2 pipeline.
     
     Processes the development and test sets, trains and evaluates both Lidstone and
     held-out models, and writes all outputs to a file.
-    
-    Args:
-        dev_set_filename (str): Path to the development set file
-        test_set_filename (str): Path to the test set file
-        input_word (str): The input word to evaluate
-        output_filename (str): Path to the output file where results will be written
         
     Pipeline:
         1. Initialize and write header information (Output1-Output6)
@@ -553,7 +547,7 @@ def main(dev_set_filename, test_set_filename, input_word, output_filename):
         6. Evaluate both models on test set (Output25-Output28)
     """
     # Parse Input
-    #dev_set_filename, test_set_filename, input_word, output_filename = parse_arguments()
+    dev_set_filename, test_set_filename, input_word, output_filename = parse_arguments()
 
     # Development set preprocessing
     # token_list represents sequence of events
@@ -576,11 +570,12 @@ def main(dev_set_filename, test_set_filename, input_word, output_filename):
             development_set = training_set_lindstone + validation_set
             held_out_model, training_set_heldout, held_out_set = held_out_model_training(f, development_set, input_word)
             
+            # **- REMOVE COMMENT TO DEBUG -**
             # Section 5: Debug held-out model code by making sure prob sums to 1
-            debug_lindstone_model(f, training_set, validation_set, best_lambda)
-            debug_lindstone_model(f, training_set, validation_set, 0.1)
-            debug_lindstone_model(f, training_set, validation_set, 1)
-            debug_held_out_model(f, held_out_model, training_set_heldout, held_out_set)  
+            # debug_lindstone_model(f, training_set, validation_set, best_lambda)
+            # debug_lindstone_model(f, training_set, validation_set, 0.1)
+            # debug_lindstone_model(f, training_set, validation_set, 1)
+            # debug_held_out_model(f, held_out_model, training_set_heldout, held_out_set)  
             
             # Section 6: Evaluation on test set
             test_set = read_and_tokenize_development_set(test_set_filename)
@@ -591,4 +586,5 @@ def main(dev_set_filename, test_set_filename, input_word, output_filename):
 
 
 if __name__ == "__main__":
-    main("develop.txt", "test.txt", "a", "output.txt")
+    main()
+    # python ex2.py develop.txt test.txt honduras output.txt
