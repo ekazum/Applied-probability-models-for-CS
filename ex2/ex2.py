@@ -568,10 +568,8 @@ def main(dev_set_filename, test_set_filename, input_word, output_filename):
             development_set_preprocessing(f, token_list)
 
             # Section 3: Lidstone model training
-            training_set_lindstone, validation_set = lidstone_model_training(f, token_list, input_word)
-            
-            best_lambda = choose_best_lambda(training_set_lindstone, validation_set)
-            
+            training_set_lindstone, validation_set = lidstone_model_training(f, token_list, input_word)            
+            best_lambda = choose_best_lambda(training_set_lindstone, validation_set)           
             lidstone_model_evaluation(f, training_set_lindstone, validation_set, best_lambda, input_word)
             
             # Section 4: Held-out model training
