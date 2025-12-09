@@ -285,7 +285,6 @@ def lidstone_model_evaluation(f, training_set, validation_set, best_lambda, inpu
         #Output18: Perplexity with λ=1.0
         #Output19: Best lambda value
         #Output20: Perplexity with best lambda
-        Debug outputs for λ=best_lambda, λ=0.1, and λ=1.0
     """
     
     # Output12: MLE of input word without smoothing P_MLE(x) = (c(x)) / N
@@ -324,11 +323,6 @@ def lidstone_model_evaluation(f, training_set, validation_set, best_lambda, inpu
     # Output20: The perplexity of the Lidstone model on validation set given best lambda
     perplexity = evaluate_lindstone_model_preplexity(training_set, validation_set, best_lambda)
     f.write(f"#Output20\t{perplexity}\n")
-    
-    # Section 5: Debug Lidstone model code by making sure p(x*)n0 + Σp(x) = 1
-    debug_lindstone_model(f, training_set, validation_set, best_lambda)
-    debug_lindstone_model(f, training_set, validation_set, 0.1)
-    debug_lindstone_model(f, training_set, validation_set, 1)
 
 
 def debug_held_out_model(f, held_out_model, training_set, held_out_set):
@@ -555,7 +549,7 @@ def main(dev_set_filename, test_set_filename, input_word, output_filename):
         2. Preprocess development set (Output7)
         3. Train and evaluate Lidstone model (Output8-Output20)
         4. Train held-out model (Output21-Output24)
-        5. Debug held-out model (Lindstone model debugged in 3)
+        5. Debug held-out / Lindstone model
         6. Evaluate both models on test set (Output25-Output28)
     """
     # Parse Input
@@ -584,8 +578,12 @@ def main(dev_set_filename, test_set_filename, input_word, output_filename):
             development_set = training_set_lindstone + validation_set
             held_out_model, training_set_heldout, held_out_set = held_out_model_training(f, development_set, input_word)
             
-            # Section 5: Debug held-out model code by making sure p(x*)n0 + Σp(x) = 1
+            # Section 5: Debug held-out model code by making sure prob sums to 1
+            debug_lindstone_model(f, training_set, validation_set, best_lambda)
+            debug_lindstone_model(f, training_set, validation_set, 0.1)
+            debug_lindstone_model(f, training_set, validation_set, 1)
             debug_held_out_model(f, held_out_model, training_set_heldout, held_out_set)
+            
             
             # Section 6: Evaluation on test set
             test_set = read_and_tokenize_development_set(test_set_filename)
