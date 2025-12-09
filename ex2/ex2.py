@@ -582,8 +582,7 @@ def main(dev_set_filename, test_set_filename, input_word, output_filename):
             debug_lindstone_model(f, training_set, validation_set, best_lambda)
             debug_lindstone_model(f, training_set, validation_set, 0.1)
             debug_lindstone_model(f, training_set, validation_set, 1)
-            debug_held_out_model(f, held_out_model, training_set_heldout, held_out_set)
-            
+            debug_held_out_model(f, held_out_model, training_set_heldout, held_out_set)  
             
             # Section 6: Evaluation on test set
             test_set = read_and_tokenize_development_set(test_set_filename)
