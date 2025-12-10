@@ -257,7 +257,7 @@ def choose_best_lambda(training_set, validation_set):
         if perplexity < best_perplexity:
             best_perplexity = perplexity
             best_lambda = lambda_val
-    return best_lambda
+    return round(best_lambda, 2)
 
 
 def lidstone_model_evaluation(f, training_set, validation_set, best_lambda, input_word):
@@ -388,7 +388,7 @@ def compute_held_out_model(training_set, held_out_set):
     # Precompute t_r and n_r for each frequency r
     # Group words by their frequency in training
     train_freq_to_words = {}  # r -> list of words with frequency r in training set
-    train_freq_to_tr_nr = {} # r -> [t_r - sum of c_H(y) for all words y where c_T(y) = r, n_r - number of distinct words that appeared exactly r times in training]
+    train_freq_to_tr_nr = {}  # r -> [t_r - sum of c_H(y) for all words y where c_T(y) = r, n_r - number of distinct words that appeared exactly r times in training]
     
     for word in all_words:
         r = training_counts[word]
@@ -517,15 +517,15 @@ def evaluation_on_test_set(f, training_set_lindstone, held_out_model, test_set, 
     f.write(f"#Output25\t{events_count_test}\n")
     
     # Output26: The perplexity of the test set according to the Lidstone model with the λ that you chose during development
-    test_preplexity = evaluate_lindstone_model_preplexity(training_set_lindstone, test_set, best_lambda)
-    f.write(f"#Output26\t{test_preplexity}\n")
+    test_lind_preplexity = evaluate_lindstone_model_preplexity(training_set_lindstone, test_set, best_lambda)
+    f.write(f"#Output26\t{test_lind_preplexity}\n")
     
     # Output27: The perplexity of the test set according to your held-out model
     test_held_out_preplexity = evaluate_held_out_model_preplexity(held_out_model, test_set)
     f.write(f"#Output27\t{test_held_out_preplexity}\n")
     
     # Output28: If your Lidstone model is a better language model for the test set than the held-out model then output the string ’L’, otherwise output ’H’
-    if test_preplexity < test_held_out_preplexity:
+    if test_lind_preplexity < test_held_out_preplexity:
         f.write("#Output28\tL\n")
     else:
         f.write("#Output28\tH\n")
